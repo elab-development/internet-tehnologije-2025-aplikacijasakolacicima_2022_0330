@@ -15,8 +15,6 @@ class UserPreference extends Model
         'user_id',
         'language',
         'theme',
-        'vehicles_per_page',
-        'sort_order',
         'cookies_accepted'
     ];
 

@@ -64,10 +64,10 @@ class User extends Authenticatable
     ];
 
 
-        public function preferences()
-    {
-        return $this->hasOne(UserPreference::class);
-    }
+    public function preferences()
+        {
+            return $this->hasOne(UserPreference::class)->withDefault();
+        }
 
 
 }
