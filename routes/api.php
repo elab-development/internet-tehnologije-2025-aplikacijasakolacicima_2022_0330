@@ -6,8 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\UserPreferenceController;
 use App\Http\Controllers\API\VehicleController;
-use App\Http\Controllers\API\RentalController;
-
+use App\Http\Controllers\API\PaymentController;
 
 #javne rute
 Route::post('/register', [AuthController::class, 'register']);
@@ -57,4 +56,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/rentals/{id}/cancel', [RentalController::class, 'cancel']);
 
     Route::get('/vehicles/{id}/rentals', [RentalController::class, 'rentalsByVehicle']);
+});
+
+#rute za payments
+Route::middleware(['auth:sanctum', 'can:admin'])->group(function () {
+    Route::post('/payments/{rentalId}', [PaymentController::class, 'store']);
+    Route::get('/payments', [PaymentController::class, 'index']);
 });
