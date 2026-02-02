@@ -70,7 +70,7 @@ class VehicleController extends Controller{
         }
 
         // Paginacija
-        $perPage = $request->query('per_page', 10);
+        $perPage = $request->query('per_page', 5);
 
         $vehicles = $query->with(['rentals' => function ($q) use ($date) {
             $q->where('start_date', '<=', $date)
