@@ -5,6 +5,8 @@ import SKODA from '../assets/skoda.jpg';
 import OPEL from '../assets/opel.jpg';
 import AUDI from '../assets/audi.jpg';
 import MERCEDES from '../assets/mercedes.jpg';
+import LearnMoreButton from './LearnMoreButton';
+import { useNavigate } from 'react-router-dom';
 
 const vehicleImages: Record<string, string> = {
   'BMW X5': BMWX5,
@@ -20,9 +22,10 @@ interface Props {
 
 export default function VehicleCard({ vehicle }: Props) {
   const imgSrc = vehicleImages[`${vehicle.brand} ${vehicle.model}`] || '/assets/vehicles/default.jpg';
-
+  const navigate = useNavigate();
   return (
     <div className="vehicle-card">
+
       <img
         src={imgSrc}
         alt={`${vehicle.brand} ${vehicle.model}`}
@@ -31,6 +34,9 @@ export default function VehicleCard({ vehicle }: Props) {
 
       <h2>{vehicle.brand} {vehicle.model}</h2>
       <p>Cena/dan: {vehicle.daily_price} €</p>
+      <LearnMoreButton
+        text="Saznaj više"
+        onClick={() => navigate(`/vehicles/${vehicle.id}`)}/>
     </div>
   );
 }

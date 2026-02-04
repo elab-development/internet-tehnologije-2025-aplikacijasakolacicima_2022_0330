@@ -1,0 +1,38 @@
+.vehicle-details {
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 20px;
+  background-color: #f9f9f9; 
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.vehicle-details h1 {
+  font-size: 32px;
+  margin-bottom: 20px;
+  color: #1a202c;
+}
+
+.vehicle-info p {
+  margin: 8px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.available {
+  color: green;
+  font-weight: bold;
+}
+
+.not-available {
+  color: red;
+  font-weight: bold;
+}
+
+.vehicle-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr; 
+  gap: 12px 20px;
+  margin-bottom: 20px;
+}
