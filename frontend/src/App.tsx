@@ -1,33 +1,34 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
+import axios from 'axios';
 
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import Home from './pages/Home';
-import Login from './pages/Login';
-
-import './App.css';
+import Home from './pages/Home.tsx';
+import Login from './pages/Login.tsx'; 
 
 function App() {
+
+  useEffect(() => {
+    const checkUser = async () => {
+        try {
+            const res = await axios.get('/api/user');
+            console.log("Korisnik je ulogovan:", res.data.user);
+        } catch (err) {
+            console.log("Korisnik nije ulogovan");
+            localStorage.removeItem('user_name');
+        }
+    };
+    checkUser();
+}, []);
+
   return (
-    <Router>
-      <div className="app-container">
-        {/* Navigacija - prikazuje se na svim stranicama */}
-        <Navbar />
+  <Router>
+      <Routes>
+        {/* Početna stranica */}
+        <Route path="/" element={<Home />} />
         
-        {/* Glavni sadržaj */}
-        <main className="main-content">
-          <Routes>
-            {/* Početna stranica */}
-            <Route path="/" element={<Home />} />
-            
-            {/* Stranica za login */}
-            <Route path="/login" element={<Login />} />
-          </Routes>
-        </main>
-        
-        {/* Footer prikazuje se na svim stranicama */}
-        <Footer />
-      </div>
+        {/* Stranica za login */}
+        <Route path="/login" element={<Login />} />
+      </Routes>
     </Router>
   );
 }

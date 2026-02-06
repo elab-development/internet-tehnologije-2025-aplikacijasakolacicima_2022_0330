@@ -1,11 +1,10 @@
-/* ===== NAVBAR OSNOVA ===== */
 .navbar {
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  padding: 0 20px;
   position: sticky;
   top: 0;
   z-index: 1000;
   box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
+  width: 100;
 }
 
 .navbar-container {
@@ -17,7 +16,7 @@
   height: 70px;
 }
 
-/* ===== LOGO ===== */
+/* logo */
 .navbar-logo {
   font-size: 1.6rem;
   font-weight: bold;
@@ -31,14 +30,14 @@
   transform: scale(1.05);
 }
 
-/* ===== NAVBAR CONTENT (Menu + Auth) ===== */
+/* CONTENT (Menu + Auth) */
 .navbar-content {
   display: flex;
   align-items: center;
   gap: 40px;
 }
 
-/* ===== MENU LINKOVI ===== */
+/* menu linkovi */
 .navbar-menu {
   display: flex;
   list-style: none;
@@ -68,7 +67,7 @@
   background-color: #4ecca3;
 }
 
-/* ===== AUTH DUGMAD ===== */
+/* login dugme */
 .navbar-auth {
   display: flex;
   gap: 12px;
@@ -90,23 +89,9 @@
   transform: translateY(-2px);
 }
 
-.btn-register {
-  background: linear-gradient(135deg, #4ecca3 0%, #45b393 100%);
-  color: #1a1a2e;
-  text-decoration: none;
-  padding: 10px 24px;
-  border-radius: 25px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  border: 2px solid transparent;
-}
 
-.btn-register:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 20px rgba(78, 204, 163, 0.4);
-}
 
-/* ===== HAMBURGER MENU (Mobilni) ===== */
+/*  HAMBURGER MENU (Mobilni) */
 .navbar-toggle {
   display: none;
   flex-direction: column;
@@ -141,7 +126,7 @@
   transform: rotate(-45deg) translate(5px, -6px);
 }
 
-/* ===== RESPONSIVE - TABLET & MOBILE ===== */
+/* RESPONSIVE - TABLET & MOBILE  */
 @media (max-width: 768px) {
   .navbar-toggle {
     display: flex;
@@ -186,8 +171,7 @@
     gap: 15px;
   }
 
-  .btn-login,
-  .btn-register {
+  .btn-login {
     text-align: center;
     padding: 15px;
   }
