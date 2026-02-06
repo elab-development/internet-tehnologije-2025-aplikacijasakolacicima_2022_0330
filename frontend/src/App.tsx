@@ -1,18 +1,33 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-import Home from './pages/Home.tsx';
-import Login from './pages/Login.tsx'; 
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import Home from './pages/Home';
+import Login from './pages/Login';
+
+import './App.css';
 
 function App() {
   return (
-  <Router>
-      <Routes>
-        {/* Početna stranica */}
-        <Route path="/" element={<Home />} />
+    <Router>
+      <div className="app-container">
+        {/* Navigacija - prikazuje se na svim stranicama */}
+        <Navbar />
         
-        {/* Stranica za login */}
-        <Route path="/login" element={<Login />} />
-      </Routes>
+        {/* Glavni sadržaj */}
+        <main className="main-content">
+          <Routes>
+            {/* Početna stranica */}
+            <Route path="/" element={<Home />} />
+            
+            {/* Stranica za login */}
+            <Route path="/login" element={<Login />} />
+          </Routes>
+        </main>
+        
+        {/* Footer prikazuje se na svim stranicama */}
+        <Footer />
+      </div>
     </Router>
   );
 }

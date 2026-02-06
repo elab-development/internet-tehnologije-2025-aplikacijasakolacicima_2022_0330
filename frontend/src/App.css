@@ -1,10 +1,38 @@
-/* Reset i body */
-body {
+/* ===== RESET I OSNOVA ===== */
+* {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #f5f5f5;
+  padding: 0;
+  box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+  line-height: 1.6;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* ===== APP CONTAINER - Flexbox za sticky footer ===== */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* ===== MAIN CONTENT - SVETLA POZADINA ===== */
+.main-content {
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ===== STILOVI ZA VOZILA (originalni svetli) ===== */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -15,6 +43,7 @@ h1 {
   text-align: center;
   font-size: 2.5rem;
   margin-bottom: 30px;
+  color: #333;
 }
 
 /* Grid za kartice vozila */
@@ -22,16 +51,18 @@ h1 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
+  max-width: 100%;
 }
 
-/* VehicleCard stil */
+/* VehicleCard stil - SVETLI */
 .vehicle-card {
   background-color: #fff;
   border-radius: 15px;
   padding: 20px;
   text-align: center;
-  box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s;
+  max-width: 100%;
 }
 
 .vehicle-card:hover {
@@ -43,11 +74,13 @@ h1 {
   font-weight: bold;
   margin-bottom: 10px;
   text-transform: uppercase;
+  color: #333;
 }
 
 .vehicle-card p {
   font-size: 1.2rem;
   margin: 5px 0;
+  color: #666;
 }
 
 /* Pagination dugmad */
@@ -62,13 +95,25 @@ h1 {
 .pagination button {
   padding: 8px 15px;
   border: none;
-  background-color: #ddd;
+  background-color: #4ecca3;
+  color: #fff;
   border-radius: 5px;
   cursor: pointer;
   font-size: 1rem;
+  transition: background-color 0.3s;
+}
+
+.pagination button:hover:not(:disabled) {
+  background-color: #3db892;
 }
 
 .pagination button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  background-color: #ddd;
+  color: #666;
+}
+
+.pagination span {
+  color: #333;
 }
