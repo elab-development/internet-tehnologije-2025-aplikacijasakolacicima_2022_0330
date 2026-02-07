@@ -4,7 +4,8 @@ import type { Vehicle } from '../types/Vehicle';
 import '../styles/VehicleDetails.css';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import api from '../axios'; // <-- minimalna promena: koristi axios
+import axios from '../axios';
+import api from '../axios';
 
 interface Rental {
   id: number;
@@ -18,22 +19,33 @@ interface ApiResponse {
   rentals: Rental[];
 }
 
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
 export default function VehicleDetails() {
   const { id } = useParams<{ id: string }>();
-
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedRange, setSelectedRange] = useState<[Date, Date] | null>(null);
   const [reservedDates, setReservedDates] = useState<Date[]>([]);
+  const [user, setUser] = useState<User | null>(null); 
+
+  useEffect(() => {
+    // dohvat korisnika
+    api.get('/user')
+      .then(res => setUser(res.data))
+      .catch(() => setUser(null));
+  }, []);
 
   useEffect(() => {
     if (!id) return;
-
     setLoading(true);
     setError(null);
 
-    // <-- fetch zamenjen sa axios
     api.get<ApiResponse>(`/vehicles/${id}/rentals`)
       .then(res => {
         setVehicle(res.data.vehicle);
@@ -57,6 +69,37 @@ export default function VehicleDetails() {
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
   if (!vehicle) return <p>Vozilo nije pronađeno</p>;
 
+  const handleReserve = async () => {
+    if (!selectedRange) return alert('Izaberi datume!');
+    if (!user) return alert('Niste ulogovani!');
+
+    const [start, end] = selectedRange;
+
+    try {
+      //await axios.get('http://localhost:8000/sanctum/csrf-cookie', {
+        //withCredentials: true,
+      //});
+      //const res = await api.post('/rentals', {
+      await api.post('/rentals', {
+        vehicle_id: vehicle.id,
+        start_date: start.toISOString().split('T')[0],
+        end_date: end.toISOString().split('T')[0],
+    });
+
+      alert('Uspešno rezervisano!');
+      const newReserved: Date[] = [];
+      let current = new Date(start);
+      while (current <= end) {
+        newReserved.push(new Date(current));
+        current.setDate(current.getDate() + 1);
+      }
+      setReservedDates(prev => [...prev, ...newReserved]);
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Došlo je do greške pri rezervaciji.');
+    }
+  };
+
   return (
     <div className="vehicle-details">
       <h1>{vehicle.brand} {vehicle.model}</h1>
@@ -79,42 +122,11 @@ export default function VehicleDetails() {
             reservedDates.some(d => d.toDateString() === date.toDateString())
           }
           tileClassName={({ date }) =>
-            reservedDates.some(d => d.toDateString() === date.toDateString())
-              ? 'reserved'
-              : null
+            reservedDates.some(d => d.toDateString() === date.toDateString()) ? 'reserved' : null
           }
         />
 
-        <button
-          className="button"
-          onClick={() => {
-            if (!selectedRange) return alert('Izaberi datume!');
-            const [start, end] = selectedRange;
-
-            // <-- fetch POST zamenjen sa axios POST
-            api.post('/rentals', {
-              user_id: 2,
-              vehicle_id: vehicle.id,
-              start_date: start.toISOString().split('T')[0],
-              end_date: end.toISOString().split('T')[0]
-            })
-            .then(res => {
-              if (res.data.rental) {
-                alert('Uspešno rezervisano!');
-                const newReserved: Date[] = [];
-                let current = new Date(start);
-                while (current <= end) {
-                  newReserved.push(new Date(current));
-                  current.setDate(current.getDate() + 1);
-                }
-                setReservedDates(prev => [...prev, ...newReserved]);
-              } else {
-                alert('Došlo je do greške pri rezervaciji.');
-              }
-            })
-            .catch(() => alert('Došlo je do greške pri rezervaciji.'));
-          }}
-        >
+        <button className="button" onClick={handleReserve}>
           Rezerviši
         </button>
       </div>

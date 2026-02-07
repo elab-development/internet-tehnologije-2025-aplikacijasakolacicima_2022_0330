@@ -12,6 +12,7 @@ use App\Http\Controllers\API\RentalController;
 Route::middleware('web')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register']);
+
 });
 
 #grupa za zasticene rute (treba im autentifikacija korisnika)
@@ -42,11 +43,12 @@ Route::middleware(['auth:sanctum', 'can:admin'])->group(function () {
         ->except(['index', 'show']); // bez javnih ruta
 });
 
-#rental rute - javne
-Route::post('/rentals', [RentalController::class, 'store']);
-
+#rental rute 
+    
 #rental rute- zasticene
-//Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/rentals', [RentalController::class, 'store']);
+
     Route::get('/rentals', [RentalController::class, 'index']);
     Route::get('/rentals/{id}', [RentalController::class, 'show']);
     
@@ -58,10 +60,14 @@ Route::post('/rentals', [RentalController::class, 'store']);
     Route::put('/rentals/{id}/cancel', [RentalController::class, 'cancel']);
 
     Route::get('/vehicles/{id}/rentals', [RentalController::class, 'rentalsByVehicle']);
-//});
+});
 
 #rute za payments
 Route::middleware(['auth:sanctum', 'can:admin'])->group(function () {
     Route::post('/payments/{rentalId}', [PaymentController::class, 'store']);
     Route::get('/payments', [PaymentController::class, 'index']);
+});
+
+Route::middleware(['web', 'auth:sanctum'])->get('/user', function (Request $request) {
+    return $request->user();
 });

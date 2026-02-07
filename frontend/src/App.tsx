@@ -5,11 +5,12 @@ import { useEffect } from 'react';
 import axios from 'axios';
 import Footer from './components/Footer.tsx';
 import Navbar from './components/Navbar.tsx';
+import VehicleDetails from './pages/VehicleDetails';
 
 import Home from './pages/Home.tsx';
 import Login from './pages/Login.tsx'; 
 
-function App() {
+export function App() {
 
   useEffect(() => {
     const checkUser = async () => {
@@ -28,14 +29,13 @@ function App() {
   <Router>
     <Navbar />
       <Routes>
-        {/* Početna stranica */}
         <Route path="/" element={<Home />} />
-        
-        {/* Stranica za login */}
         <Route path="/login" element={<Login />} />
+        <Route path="/vehicles/:id" element={<VehicleDetails />} />
       </Routes>
       <Footer />
     </Router>
   );
 }
 
+export default App;

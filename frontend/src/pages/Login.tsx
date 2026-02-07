@@ -19,9 +19,10 @@ const AuthForm = () => {
     try {
         console.log('Uzimam CSRF token...');
         
-        const csrfResponse = await axios.get('/sanctum/csrf-cookie');
-        console.log('CSRF Response:', csrfResponse);
-        
+        //const csrfResponse = await axios.get('/sanctum/csrf-cookie', { withCredentials: true });
+        //console.log('CSRF Response:', csrfResponse);
+        await axios.get('/sanctum/csrf-cookie', { withCredentials: true });
+
         const url = isRegister ? '/api/register' : '/api/login';
         const data = isRegister
             ? { name, email, password, password_confirmation: passwordConfirmation }
@@ -29,7 +30,7 @@ const AuthForm = () => {
 
         console.log('Šaljem request za log:', url, data);
         
-        await axios.post(url, data);
+        await axios.post(url, data, { withCredentials: true });
 
         alert(isRegister ? 'Uspešna registracija!' : 'Uspešna prijava!');
         window.location.href = '/';

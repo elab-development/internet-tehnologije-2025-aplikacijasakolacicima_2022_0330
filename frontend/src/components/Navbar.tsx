@@ -1,6 +1,15 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import '../styles/Navbar.css';
+import { useEffect } from 'react';
+import api from '../axios';
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  // dodaj sve ostalo što ti treba
+}
 
 const Navbar = () => {
   const location = useLocation();
@@ -13,6 +22,14 @@ const Navbar = () => {
   const closeMenu = () => {
     setIsMenuOpen(false);
   };
+
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    api.get('/user', { withCredentials: true })
+      .then(res => setUser(res.data))
+      .catch(() => setUser(null));
+  }, []);
 
   return (
     <nav className="navbar">
@@ -32,6 +49,14 @@ const Navbar = () => {
           <span></span>
           <span></span>
         </button>
+
+        <nav>
+          {user ? (
+            <span>Dobrodošli, {user.name}</span>
+          ) : (
+            <span>Niste ulogovani</span>
+          )}
+        </nav>
 
         {/* Navigacija */}
         <div className={`navbar-content ${isMenuOpen ? 'active' : ''}`}>

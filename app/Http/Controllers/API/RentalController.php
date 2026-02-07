@@ -11,8 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 
-class RentalController extends Controller
-{
+class RentalController extends Controller{
     // Prikaz svih rentiranja
     public function index()
     {
@@ -41,11 +40,16 @@ class RentalController extends Controller
     // Kreiranje rentiranja
     public function store(Request $request)
     {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Niste ulogovani'], 401);
+        }
+
         $validator = Validator::make($request->all(), [
-        //'user_id'    => 'required|exists:users,id',
-        'vehicle_id' => 'required|exists:vehicle,id',
-        'start_date' => 'required|date|after_or_equal:today',
-        'end_date'   => 'required|date|after_or_equal:start_date',
+            'vehicle_id' => 'required|exists:vehicle,id',
+            'start_date' => 'required|date|after_or_equal:today',
+            'end_date'   => 'required|date|after_or_equal:start_date',
         ]);
 
         if ($validator->fails()) {
@@ -57,7 +61,6 @@ class RentalController extends Controller
 
         $data = $validator->validated();
 
-        // pocetak transakcije
         \DB::beginTransaction();
 
         try {
@@ -80,36 +83,33 @@ class RentalController extends Controller
                     'message' => 'Vozilo je zauzeto u izabranom periodu.'
                 ], 409);
             }
+
             $vehicle = Vehicle::findOrFail($data['vehicle_id']);
 
-            $days = (new \Carbon\Carbon($data['start_date']))
-                ->diffInDays(new \Carbon\Carbon($data['end_date'])) + 1;
+            $days = $start->diffInDays($end) + 1;
             $totalPrice = $days * $vehicle->daily_price;
 
-            // Kreiranje rentiranja
             $rental = Rental::create([
-                'user_id'     => $data['user_id'],
-                'vehicle_id'  => $data['vehicle_id'],
+                'user_id'     => $user->id,
+                'vehicle_id'  => $vehicle->id,
                 'start_date'  => $data['start_date'],
                 'end_date'    => $data['end_date'],
                 'total_price' => $totalPrice,
                 'status'      => 'na_cekanju'
             ]);
 
-            // potvrdjivanje transakcije
             \DB::commit();
 
             return response()->json([
                 'message' => 'Rezervacija uspešno kreirana.',
                 'rental' => $rental
             ], 201);
-        } catch (\Exception $e) {
 
-            //ponistavnanje transakcije
+        } catch (\Exception $e) {
             \DB::rollBack();
 
             return response()->json([
-                'message' => 'Došlo je do greške prilikom kreiranja rezervacije.',
+                'message' => 'Greška pri kreiranju rezervacije.',
                 'error' => $e->getMessage()
             ], 500);
         }
