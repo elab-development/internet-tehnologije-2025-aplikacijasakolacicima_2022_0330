@@ -8,6 +8,8 @@ use App\Models\Rental;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Vehicle;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+
 
 class RentalController extends Controller
 {
@@ -40,7 +42,7 @@ class RentalController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-        'user_id'    => 'required|exists:users,id',
+        //'user_id'    => 'required|exists:users,id',
         'vehicle_id' => 'required|exists:vehicle,id',
         'start_date' => 'required|date|after_or_equal:today',
         'end_date'   => 'required|date|after_or_equal:start_date',

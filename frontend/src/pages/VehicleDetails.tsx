@@ -4,6 +4,7 @@ import type { Vehicle } from '../types/Vehicle';
 import '../styles/VehicleDetails.css';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import api from '../axios'; // <-- minimalna promena: koristi axios
 
 interface Rental {
   id: number;
@@ -32,17 +33,13 @@ export default function VehicleDetails() {
     setLoading(true);
     setError(null);
 
-    fetch(`http://127.0.0.1:8000/api/vehicles/${id}/rentals`)
+    // <-- fetch zamenjen sa axios
+    api.get<ApiResponse>(`/vehicles/${id}/rentals`)
       .then(res => {
-        if (!res.ok) throw new Error('Greška pri učitavanju podataka');
-        return res.json();
-      })
-      .then((data: ApiResponse) => {
-        setVehicle(data.vehicle);
+        setVehicle(res.data.vehicle);
 
-        // pretvaranje svih postojecih rezervacija u niz
         const allReserved: Date[] = [];
-        data.rentals.forEach(r => {
+        res.data.rentals.forEach(r => {
           let current = new Date(r.start_date);
           const end = new Date(r.end_date);
           while (current <= end) {
@@ -94,22 +91,16 @@ export default function VehicleDetails() {
             if (!selectedRange) return alert('Izaberi datume!');
             const [start, end] = selectedRange;
 
-            fetch(`http://127.0.0.1:8000/api/rentals`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                user_id: 2, //trenutno samo radi za user id=2, nakon sto uradimo login se ovo menja
-                vehicle_id: vehicle.id,
-                start_date: start.toISOString().split('T')[0],
-                end_date: end.toISOString().split('T')[0]
-              })
+            // <-- fetch POST zamenjen sa axios POST
+            api.post('/rentals', {
+              user_id: 2,
+              vehicle_id: vehicle.id,
+              start_date: start.toISOString().split('T')[0],
+              end_date: end.toISOString().split('T')[0]
             })
-            .then(res => res.json())
-            .then(data => {
-              if (data.rental) {
+            .then(res => {
+              if (res.data.rental) {
                 alert('Uspešno rezervisano!');
-                
-                //dodavanje nogov datuma koji je rezervisan
                 const newReserved: Date[] = [];
                 let current = new Date(start);
                 while (current <= end) {

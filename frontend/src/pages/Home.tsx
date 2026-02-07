@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import VehicleCard from '../components/VehicleCard';
 import type { Vehicle } from '../types/Vehicle';
+import api from '../axios'; // axios instance sa baseURL: '/api'
 import '../styles/Home.css';
 
 interface PaginationData {
@@ -20,16 +21,13 @@ export default function Home() {
     setError(null);
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/vehicles?page=${pageNumber}`);
-      if (!response.ok) throw new Error('Greška pri učitavanju vozila');
-      const json = await response.json();
-
-      // Prilagođeno tvoj backend JSON formatu
-      const data = json.data; // ovde je Laravel paginator
-      setVehicles(data.data); // lista vozila
+      const response = await api.get(`/vehicles?page=${pageNumber}`);
+      // Laravel paginator
+      const data = response.data.data;
+      setVehicles(data.data);
       setPagination({
         current_page: data.current_page,
-        last_page: data.last_page
+        last_page: data.last_page,
       });
       setPage(data.current_page);
     } catch (e) {
@@ -54,7 +52,7 @@ export default function Home() {
       <h1>Lista vozila</h1>
 
       {loading && <p>Učitavam...</p>}
-      {error && <p style={{color: 'red'}}>{error}</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
 
       <div className="vehicle-grid">
         {vehicles.map((v) => (
@@ -67,8 +65,13 @@ export default function Home() {
           <button onClick={() => goToPage(page - 1)} disabled={page === 1}>
             Prethodna
           </button>
-          <span>Strana {page} od {pagination.last_page}</span>
-          <button onClick={() => goToPage(page + 1)} disabled={page === pagination.last_page}>
+          <span>
+            Strana {page} od {pagination.last_page}
+          </span>
+          <button
+            onClick={() => goToPage(page + 1)}
+            disabled={page === pagination.last_page}
+          >
             Sledeća
           </button>
         </div>
