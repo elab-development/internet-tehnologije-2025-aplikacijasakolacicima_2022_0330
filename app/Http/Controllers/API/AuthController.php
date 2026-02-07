@@ -40,61 +40,53 @@ class AuthController extends Controller
             'role' => User::ROLE_REGISTERED,
         ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        Auth::login($user);
+        $request->session()->regenerate();
 
         return response()->json([
             'message' => 'Korisnik uspešno registrovan',
             'user' => $user,
-            'access_token' => $token,
-            'token_type' => 'Bearer'
         ], 201);
     }
 
      #login
     public function login(Request $request)
     {
-        #validacija podataka
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        $credentials = $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
 
+    //remember je true/false i stiže sa frontenda
+    if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
 
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Greška pri validaciji',
-                'errors' => $validator->errors()
-            ], 422);
-        }   
-        
-        #autentifikacija korisnika
-         if (!Auth::attempt($request->only('email', 'password'))) {
-            return response()->json([
-                'message' => 'Pogrešno uneto ime i/ili lozinka'
-            ], 401); 
-        }
-
-        #kreiranje korisnika i tokena
-        $user = User::where('email', $request->email)->firstOrFail();
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        #odgovor
         return response()->json([
             'message' => 'Uspešno prijavljivanje!',
-            'user' => $user,
-            'access_token' => $token,
-            'token_type' => 'Bearer'
+            'user' => Auth::user(),
         ]);
+    }
+
+    return response()->json(['message' => 'Pogrešni podaci'], 401);
 
     }
 
     #logout
     public function logout(Request $request){
-        $request->user()->currentAccessToken()->delete();
-
-        return response()->json([
-            'message' => 'Uspešno odjavljivanje'
-        ]);
+          $user = $request->user();
+    if ($user) {
+        $user->remember_token = null;
+        $user->save();
+    }
+    
+    Auth::guard('web')->logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+    
+    return response()->json(['message' => 'Logged out'])
+        ->withCookie(cookie()->forget('laravel_session'))
+        ->withCookie(cookie()->forget('remember_web_' . sha1('web')))
+        ->withCookie(cookie()->forget('XSRF-TOKEN'));
     }
 
 

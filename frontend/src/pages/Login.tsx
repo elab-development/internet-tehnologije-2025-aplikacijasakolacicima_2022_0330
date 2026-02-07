@@ -3,41 +3,48 @@ import axios from 'axios';
 import '../styles/Login.css';
 
 const AuthForm = () => {
-    const [isRegister, setIsRegister] = useState(false); // State za promenu forme
+    const [isRegister, setIsRegister] = useState(false);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [passwordConfirmation, setPasswordConfirmation] = useState('');
     const [error, setError] = useState('');
 
+    const [remember, setRemember] = useState(false);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
 
-        const url = isRegister 
-            ? 'http://127.0.0.1:8000/api/register' 
-            : 'http://127.0.0.1:8000/api/login';
-
-        const data = isRegister 
+    try {
+        console.log('Uzimam CSRF token...');
+        
+        const csrfResponse = await axios.get('/sanctum/csrf-cookie');
+        console.log('CSRF Response:', csrfResponse);
+        
+        const url = isRegister ? '/api/register' : '/api/login';
+        const data = isRegister
             ? { name, email, password, password_confirmation: passwordConfirmation }
-            : { email, password };
+            : { email, password, remember };
 
-        try {
-            const response = await axios.post(url, data);
-            
-            const token = response.data.access_token;
-            localStorage.setItem('auth_token', token);
-            localStorage.setItem('user_name', response.data.user.name);
+        console.log('Šaljem request za log:', url, data);
+        
+        await axios.post(url, data);
 
-            alert(isRegister ? 'Uspešna registracija!' : 'Uspešna prijava!');
-        } catch (err: any) {
-            if (err.response && err.response.data.errors) {
-                const firstError = Object.values(err.response.data.errors)[0] as string;
-                setError(firstError);
-            } else {
-                setError(err.response?.data?.message || 'Došlo je do greške.');
-            }
+        alert(isRegister ? 'Uspešna registracija!' : 'Uspešna prijava!');
+        window.location.href = '/';
+        
+    } catch (err: any) {
+        console.error('Greška:', err);
+        console.error('Response data:', err.response?.data);
+        
+        if (err.response && err.response.data.errors) {
+            const firstError = Object.values(err.response.data.errors)[0] as string;
+            setError(firstError);
+        } else {
+            setError(err.response?.data?.message || 'Došlo je do greške.');
         }
+    }
     };
 
     return (
@@ -85,7 +92,14 @@ const AuthForm = () => {
                         />
                     )}
                     
-                    
+                    <label>
+                        <input 
+                            type="checkbox" 
+                            checked={remember} 
+                            onChange={(e) => setRemember(e.target.checked)} 
+                        /> 
+                        Zapamti me
+                    </label>
                     <button type="submit" className="login-btn">
                         {isRegister ? 'Registruj se' : 'Uloguj se'}
                     </button>

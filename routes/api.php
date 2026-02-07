@@ -9,9 +9,10 @@ use App\Http\Controllers\API\VehicleController;
 use App\Http\Controllers\API\PaymentController;
 use App\Http\Controllers\API\RentalController;
 
-#javne rute
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::middleware('web')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/register', [AuthController::class, 'register']);
+});
 
 #grupa za zasticene rute (treba im autentifikacija korisnika)
 Route::middleware('auth:sanctum')->group(function () {
@@ -23,9 +24,6 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::post('/forgot-password', [AuthController::class, 'sendResetLink']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
 
 #rute za kolacice
 Route::middleware('auth:sanctum')->group(function () {
