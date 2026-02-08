@@ -93,7 +93,7 @@ const AuthForm = () => {
                         />
                     )}
                     
-                    <label>
+                    <label className='rememberText'>
                         <input 
                             type="checkbox" 
                             checked={remember} 

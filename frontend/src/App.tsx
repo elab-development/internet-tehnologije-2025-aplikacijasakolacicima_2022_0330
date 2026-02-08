@@ -27,13 +27,17 @@ export function App() {
 
   return (
   <Router>
+    <div className="app-container">
     <Navbar />
+    <div className="main-content">
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/vehicles/:id" element={<VehicleDetails />} />
       </Routes>
+      </div>
       <Footer />
+      </div>
     </Router>
   );
 }

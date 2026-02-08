@@ -8,7 +8,7 @@
     justify-content: center;
     align-items: center;
     width: 100%;
-    height: 100vh;
+    height: 80vh;
     overflow: hidden;
 }
 
@@ -18,7 +18,7 @@
     top: 0; 
     left: 0;
     width: 100%; 
-    height: 100%;
+    height: 150%;
     background: url('../assets/backgroundLogin.jpg') no-repeat center center;
     background-size: cover;
     filter: blur(5px);
@@ -110,22 +110,7 @@
     color: #357abd;
 }
 
-.remember-container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
-    color: white;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-.remember-container input {
-    margin-right: 10px;
-    cursor: pointer;
-    width: 16px;
-    height: 16px;
-}
-
-.remember-container label {
-    cursor: pointer;
+.rememberText{
+    color: #2d3748;
+    font-weight: bold;
 }
