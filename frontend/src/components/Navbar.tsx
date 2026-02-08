@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import "../styles/Navbar.css";
 import { useEffect } from "react";
 import api from "../axios";
+import ThemeToggle from "./ThemeToggle";
 
 interface User {
     id: number;
@@ -70,6 +71,12 @@ const Navbar = () => {
 
                 {/* Navigacija */}
                 <div className={`navbar-content ${isMenuOpen ? "active" : ""}`}>
+
+                    <div className="navbar-theme">
+                        <ThemeToggle />
+                    </div>
+
+<div className="nav-pages">
                     <ul className="navbar-menu">
                         <li>
                             <Link
@@ -83,6 +90,7 @@ const Navbar = () => {
                             </Link>
                         </li>
                     </ul>
+
 
                     {/* Login dugme */}
                     <div className="navbar-auth">
@@ -111,6 +119,7 @@ const Navbar = () => {
                         )}
                     </div>
                 </div>
+            </div>
             </div>
         </nav>
     );

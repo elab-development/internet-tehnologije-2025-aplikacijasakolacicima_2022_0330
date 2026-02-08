@@ -1,9 +1,9 @@
 .footer {
   width: 100%;
-  background-color: #1a1a2e;
-  color: #ffffff;
+  background-color: var(--navbar-bg);;
+  color: var(--text-primary);
   margin-top: auto;
-  padding-bottom: 20px;
+  padding: 20px 0px;
 }
 
 .footer-container {

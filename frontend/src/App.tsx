@@ -1,5 +1,4 @@
-import { RouterProvider } from 'react-router-dom';
-import { router } from './router';
+import './App.css'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useEffect } from 'react';
 import axios from 'axios';

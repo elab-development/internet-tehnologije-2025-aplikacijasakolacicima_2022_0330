@@ -24,14 +24,18 @@ class UserPreferenceController extends Controller
     public function update(Request $request)
     {
         $data = $request->validate([
-            'cookies_accepted' => 'required|boolean',
+            'cookies_accepted' => 'nullable|boolean',
             'language' => 'nullable|string|max:10',
             'theme' => 'nullable|in:light,dark',
         ]);
 
+        if (!isset($data['cookies_accepted'])) {
+            $data['cookies_accepted'] = true;
+        }
+
         $preferences = UserPreference::updateOrCreate(
             ['user_id' => auth()->id()],
-            $data 
+            array_filter($data)
         );
 
         //ako su kolacici odbijeni

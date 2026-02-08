@@ -28,8 +28,9 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 #rute za kolacice
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user_preferences', [UserPreferenceController::class, 'show']);
-    Route::post('/user_preferences', [UserPreferenceController::class, 'update']);
+    Route::get('/user-preferences', [UserPreferenceController::class, 'show']);
+    Route::post('/user-preferences', [UserPreferenceController::class, 'update']);
+    Route::put('/user-preferences', [UserPreferenceController::class, 'update']);
 });
 
 # Vehicle rute- javne

@@ -2,7 +2,7 @@
   max-width: 700px;
   margin: 40px auto;
   padding: 20px;
-  background-color: #f9f9f9; 
+  background-color: var(--bg-card);; 
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -11,13 +11,17 @@
 .vehicle-details h1 {
   font-size: 32px;
   margin-bottom: 20px;
-  color: #1a202c;
+  color: var(--text-primary);
+}
+
+h3{
+ color: var(--text-secondary);
 }
 
 .vehicle-info p {
   margin: 8px 0;
   font-size: 16px;
-  color: #333;
+  color: var(--text-secondary);
 }
 
 .available {
@@ -35,4 +39,86 @@
   grid-template-columns: 1fr 1fr; 
   gap: 12px 20px;
   margin-bottom: 20px;
+}
+
+/* PODESAVANJA KALENDARA ZA PROMENU TEME */
+
+.react-calendar {
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--border-color) ;
+  color: var(--text-primary) !important;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.react-calendar__navigation button {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+.react-calendar__navigation button:hover {
+  background-color: var(--bg-primary) !important;
+}
+
+.react-calendar__month-view__weekdays {
+  color: var(--text-secondary) !important;
+}
+
+.react-calendar__month-view__weekdays__weekday abbr {
+  text-decoration: none;
+  color: var(--text-secondary);
+}
+
+.react-calendar__tile {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+}
+
+.react-calendar__tile:hover {
+  background-color: var(--bg-secondary) !important;
+}
+
+.react-calendar__tile--active {
+  background-color: #4ecca3 !important;
+  color: #1a1a2e !important;
+}
+
+.react-calendar__tile--active:hover {
+  background-color: #45b890 !important;
+}
+
+.react-calendar__tile--now {
+  background-color: rgba(78, 204, 163, 0.2) !important;
+  color: var(--text-primary) !important;
+}
+
+.react-calendar__tile--now:hover {
+  background-color: rgba(78, 204, 163, 0.3) !important;
+}
+
+.react-calendar__tile.reserved {
+  background-color: #ff4d4d !important;
+  color: white !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}
+
+.react-calendar__tile.reserved:hover {
+  background-color: #ff4d4d !important;
+}
+
+.react-calendar__month-view__days__day--neighboringMonth {
+  color: var(--text-secondary) !important;
+  opacity: 0.5;
+}
+
+.react-calendar__tile--range {
+  background-color: rgba(78, 204, 163, 0.3) !important;
+  color: var(--text-primary) !important;
+}
+
+.react-calendar__tile--rangeStart,
+.react-calendar__tile--rangeEnd {
+  background-color: #4ecca3 !important;
+  color: #1a1a2e !important;
 }

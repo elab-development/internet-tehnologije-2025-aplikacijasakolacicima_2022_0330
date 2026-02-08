@@ -1,5 +1,5 @@
 .navbar {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  background: var(--navbar-bg);;
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -11,9 +11,17 @@
   max-width: 1200px;
   margin: 0 auto;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+   justify-content: space-between;
   height: 70px;
+}
+
+.nav-pages{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 20vw;
+  justify-content: space-between;
 }
 
 /* logo */
@@ -34,6 +42,9 @@
   display: flex;
   align-items: center;
   gap: 40px;
+  justify-content: space-between;
+    flex: 1;
+    margin-left: 40px;
 }
 
 .navbar-menu {
@@ -217,12 +228,19 @@
     opacity: 0;
     transition: all 0.4s ease;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    width: 100wv;
   }
 
   .navbar-content.active {
     transform: translateY(0);
     opacity: 1;
+    width: 100%;
   }
+
+  .nav-pages{
+  display: flex;
+  flex-direction: column;
+}
 
   .navbar-menu {
     flex-direction: column;

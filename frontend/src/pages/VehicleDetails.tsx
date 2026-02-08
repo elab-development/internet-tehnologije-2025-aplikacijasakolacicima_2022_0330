@@ -4,7 +4,6 @@ import type { Vehicle } from '../types/Vehicle';
 import '../styles/VehicleDetails.css';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import axios from '../axios';
 import api from '../axios';
 
 interface Rental {

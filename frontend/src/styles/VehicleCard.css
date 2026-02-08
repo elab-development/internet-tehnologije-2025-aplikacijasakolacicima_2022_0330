@@ -1,11 +1,11 @@
 .vehicle-card {
-  background-color: #fff;
+  background-color: var(--bg-card);;
   border-radius: 15px;
   padding: 20px;
   text-align: center;
   box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
   transition: transform 0.2s;
-  color: black;
+  color: var(--text-primary);
 }
 
 .vehicle-card:hover {
@@ -17,6 +17,7 @@
   font-weight: bold;
   margin-bottom: 10px;
   text-transform: uppercase;
+  color:var(--text-primary);
 }
 
 .vehicle-card p {
