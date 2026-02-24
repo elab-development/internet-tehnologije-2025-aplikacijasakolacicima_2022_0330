@@ -72,3 +72,16 @@ Route::middleware(['auth:sanctum', 'can:admin'])->group(function () {
 Route::middleware(['web', 'auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::get('/convert-rsd-to-eur', function (Illuminate\Http\Request $request) {
+    $amount = $request->query('amount');
+    
+    $response = Http::get('https://api.exchangerate.host/convert', [
+        'from' => 'RSD',
+        'to' => 'EUR',
+        'amount' => $amount,
+        'access_key' => env('EXCHANGE_API_KEY')
+    ]);
+
+    return $response->json();
+});

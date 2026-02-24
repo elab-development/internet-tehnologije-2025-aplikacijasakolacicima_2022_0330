@@ -71,55 +71,58 @@ const Navbar = () => {
 
                 {/* Navigacija */}
                 <div className={`navbar-content ${isMenuOpen ? "active" : ""}`}>
-
                     <div className="navbar-theme">
                         <ThemeToggle />
                     </div>
 
-<div className="nav-pages">
-                    <ul className="navbar-menu">
-                        <li>
-                            <Link
-                                to="/"
-                                className={
-                                    location.pathname === "/" ? "active" : ""
-                                }
-                                onClick={closeMenu}
-                            >
-                                Početna
-                            </Link>
-                        </li>
-                    </ul>
+                    <div className="nav-pages">
+                        <ul className="navbar-menu">
+                            <li>
+                                <Link
+                                    to="/"
+                                    className={
+                                        location.pathname === "/"
+                                            ? "active"
+                                            : ""
+                                    }
+                                    onClick={closeMenu}
+                                >
+                                    Početna
+                                </Link>
+                            </li>
+                        </ul>
 
-
-                    {/* Login dugme */}
-                    <div className="navbar-auth">
-                        {user ? (
-                            <div className="user-dropdown">
-                                <span className="user-name">
-                                    Dobrodošli, <span className="user">{user.name}</span>
-                                </span>
-                                <div className="dropdown-content">
-                                    <button
-                                        onClick={handleLogout}
-                                        className="btn-logout"
-                                    >
-                                        Odjava
-                                    </button>
+                        {/* Login dugme */}
+                        <div className="navbar-auth">
+                            {user ? (
+                                <div className="user-dropdown">
+                                    <span className="user-name">
+                                        Dobrodošli,{" "}
+                                        <span className="user">
+                                            {user.name}
+                                        </span>
+                                    </span>
+                                    <div className="dropdown-content">
+                                        <button
+                                            onClick={handleLogout}
+                                            className="btn-logout"
+                                        >
+                                            Odjava
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        ) : (
-                            <Link
-                                to="/login"
-                                className={`btn-login ${location.pathname === "/login" ? "active" : ""}`}
-                                onClick={closeMenu}
-                            >
-                                Prijava
-                            </Link>
-                        )}
+                            ) : (
+                                <Link
+                                    to="/login"
+                                    className={`btn-login ${location.pathname === "/login" ? "active" : ""}`}
+                                    onClick={closeMenu}
+                                >
+                                    Prijava
+                                </Link>
+                            )}
+                        </div>
                     </div>
                 </div>
-            </div>
             </div>
         </nav>
     );

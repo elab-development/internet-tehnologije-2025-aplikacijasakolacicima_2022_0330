@@ -28,12 +28,8 @@ class RentalController extends Controller{
             return response()->json(['message' => 'Rentiranje nije pronađeno'], 404);
         }
 
-        $priceInEUR = $rental->getTotalPriceInEUR();
-
-
         return response()->json([
         'renta' => $rental,
-        'cena_u_evrima' => $priceInEUR
         ], 200);
     }
 

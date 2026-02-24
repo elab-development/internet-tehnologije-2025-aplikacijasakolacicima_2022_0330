@@ -61,37 +61,6 @@ class Rental extends Model
                now()->between($this->start_date, $this->end_date);
     }
 
-    public function getTotalPriceInEUR() {
-     try {
-        $response = Http::get('https://api.exchangerate.host/convert', [
-            'from' => 'RSD',
-            'to' => 'EUR',
-            'amount' => $this->total_price,
-            'access_key' => env('EXCHANGE_API_KEY')
-        ]);
-
-        if ($response->failed()) {
-            return ['error' => 'Greška prilikom poziva API-ja.'];
-        }
-
-        $data = $response->json();
-
-        if (!isset($data['result'])) {
-            return ['error' => 'Nevažeći odgovor API-ja.', 'details' => $data];
-        }
-
-        $rate = $data['info']['rate'] ?? null;
-
-        return [
-            'original' => $this->total_price . ' RSD',
-            'converted' => round($data['result'], 2) . ' EUR',
-            'rate' => $rate ? round($rate, 4) : 'podatak nije dostupan'
-        ];
-    } catch (\Exception $e) {
-        return ['error' => 'Greška: ' . $e->getMessage()];
-    }
-    }
-
     public function payment()
     {
         return $this->hasOne(Payment::class);
