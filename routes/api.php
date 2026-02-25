@@ -61,6 +61,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/rentals/{id}/cancel', [RentalController::class, 'cancel']);
 
     Route::get('/vehicles/{id}/rentals', [RentalController::class, 'rentalsByVehicle']);
+
+    Route::get('/rentals-statistics', [RentalController::class, 'rentalStats']);
 });
 
 #rute za payments
@@ -73,7 +75,7 @@ Route::middleware(['web', 'auth:sanctum'])->get('/user', function (Request $requ
     return $request->user();
 });
 
-Route::get('/convert-rsd-to-eur', function (Illuminate\Http\Request $request) {
+Route::get('/convert-rsd-to-eur', function (Request $request) {
     $amount = $request->query('amount');
     
     $response = Http::get('https://api.exchangerate.host/convert', [
