@@ -9,6 +9,7 @@ interface User {
     id: number;
     name: string;
     email: string;
+    role: string;
 }
 
 const Navbar = () => {
@@ -90,6 +91,22 @@ const Navbar = () => {
                                     Početna
                                 </Link>
                             </li>
+
+                        {user && user.role === "admin" && (
+                            <li>
+                                <Link
+                                    to="/statistics"
+                                    className={
+                                        location.pathname === "/statistics"
+                                            ? "active"
+                                            : ""
+                                    }
+                                    onClick={closeMenu}
+                                >
+                                    Dashboard
+                                </Link>
+                            </li>
+                        )}
                         </ul>
 
                         {/* Login dugme */}
