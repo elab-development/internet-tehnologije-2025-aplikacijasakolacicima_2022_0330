@@ -250,4 +250,17 @@ class RentalController extends Controller{
         ], 200);
     }
 
+// Broj rentiranja grupisanih po nazivu vozila
+    public function rentalStats()
+{
+    
+    $stats = \DB::table('rentals')
+        ->join('vehicle', 'rentals.vehicle_id', '=', 'vehicle.id')
+        ->select(\DB::raw('CONCAT(vehicle.brand, " ", vehicle.model) as vehicle_name'), \DB::raw('count(*) as total'))
+        ->groupBy('vehicle_name')
+        ->get();
+
+    return response()->json($stats);
+}
+
 }
