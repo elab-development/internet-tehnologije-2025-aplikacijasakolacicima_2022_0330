@@ -15,6 +15,13 @@ class RentalController extends Controller{
     // Prikaz svih rentiranja
     public function index()
     {
+        //IDOR zastita
+        $user = Auth::user();
+    
+        if ($user->role !== 'admin') {
+        return response()->json(['message' => 'Nemate dozvolu'], 403);
+        }
+
         $rentals = Rental::with(['user', 'vehicle'])->get();
         return response()->json($rentals, 200);
     }
@@ -26,6 +33,11 @@ class RentalController extends Controller{
 
         if (!$rental) {
             return response()->json(['message' => 'Rentiranje nije pronađeno'], 404);
+        }
+
+        // IDOR zaštita
+        if (!$this->authorizeRental($rental)) {
+        return response()->json(['message' => 'Nemate pristup ovoj rezervaciji'], 403);
         }
 
         return response()->json([
@@ -120,6 +132,11 @@ class RentalController extends Controller{
             return response()->json(['message' => 'Rentiranje nije pronađeno'], 404);
         }
 
+         // IDOR zaštita
+        if (!$this->authorizeRental($rental)) {
+        return response()->json(['message' => 'Nemate pristup ovoj rezervaciji'], 403);
+        }
+
         if ($rental->isPlacena()) {
             return response()->json(['message' => 'Plaćena rezervacija se ne može menjati'], 403);
         }
@@ -155,6 +172,13 @@ class RentalController extends Controller{
             return response()->json(['message' => 'Rentiranje nije pronađeno'], 404);
         }
 
+        $user = Auth::user();
+
+        // IDOR zastita
+        if ($user->role !== 'admin') {
+        return response()->json(['message' => 'Nemate dozvolu za brisanje'], 403);
+        }
+
         $rental->delete();
 
         return response()->json(['message' => 'Rentiranje obrisano'], 200);
@@ -168,6 +192,12 @@ class RentalController extends Controller{
         if (!$rental) {
             return response()->json(['message' => 'Rezervacija nije pronađena'], 404);
         }
+
+         // IDOR zaštita
+        if (!$this->authorizeRental($rental)) {
+        return response()->json(['message' => 'Nemate pristup ovoj rezervaciji'], 403);
+        }
+
 
         $rental->update(['status' => 'otkazana']);
 
@@ -233,16 +263,28 @@ class RentalController extends Controller{
     //sve rezervacije za jedno vozilo
     public function rentalsByVehicle($vehicle_id)
     {
+        $user = Auth::user();
+
         $vehicle = Vehicle::find($vehicle_id);
 
         if (!$vehicle) {
             return response()->json(['message' => 'Vozilo nije pronađeno'], 404);
         }
-
-        $rentals = Rental::with('user')
+        
+        //IDOR zastita
+        if ($user->role === 'admin') {
+            $rentals = Rental::with('user')
                         ->where('vehicle_id', $vehicle_id)
                         ->orderBy('start_date', 'desc')
                         ->get();
+        } else {
+            $rentals = Rental::select('start_date', 'end_date', 'status')
+                        ->where('vehicle_id', $vehicle_id)
+                        ->whereIn('status', ['na_cekanju', 'placena'])
+                        ->orderBy('start_date', 'desc')
+                        ->get();
+        }
+
 
         return response()->json([
             'vehicle' => $vehicle,
@@ -262,5 +304,11 @@ class RentalController extends Controller{
 
     return response()->json($stats);
 }
+
+    private function authorizeRental(Rental $rental): bool
+    {
+        $user = Auth::user();
+        return $user->role === 'admin' || $rental->user_id === $user->id;
+    }
 
 }
