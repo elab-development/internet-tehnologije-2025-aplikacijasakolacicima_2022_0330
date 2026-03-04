@@ -30,8 +30,12 @@ class AppServiceProvider extends ServiceProvider
     }
     
     // Mapiraj MySQL enum na string
+    try {
      $platform = \DB::getDoctrineConnection()->getDatabasePlatform();
      $platform->registerDoctrineTypeMapping('enum', 'string');
+     } catch (\Exception $e) {
+            // Zbog ignorisanja greske tokom Docker build-a, jer se baza jos nije pokrenula
+        }
 
     }
 }
