@@ -1,0 +1,33 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Aplikacija sa Kolačićima – Rent-a-Car API",
+        "description": "REST API za rent-a-car aplikaciju. Koristi Laravel session-based cookie autentifikaciju.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "/api",
+            "description": "API server"
+        }
+    ],
+    "paths": {
+        "/": {}
+    },
+    "components": {
+        "securitySchemes": {
+            "cookieAuth": {
+                "type": "apiKey",
+                "description": "Laravel session cookie (automatski se šalje iz browsera nakon login-a)",
+                "name": "laravel_session",
+                "in": "cookie"
+            },
+            "csrfToken": {
+                "type": "apiKey",
+                "description": "CSRF zaštita – obavezno za POST, PUT, PATCH, DELETE zahteve",
+                "name": "X-XSRF-TOKEN",
+                "in": "header"
+            }
+        }
+    }
+}

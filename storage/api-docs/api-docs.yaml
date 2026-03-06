@@ -1,0 +1,1252 @@
+openapi: 3.0.3
+info:
+  title: Aplikacija sa Kolačićima – Rent-a-Car API
+  description: |
+    REST API za rent-a-car aplikaciju. Koristi **Laravel session-based cookie autentifikaciju**.
+
+    ## Kako funkcioniše autentifikacija
+
+    Aplikacija koristi kolačiće (cookies) umesto Bearer tokena:
+
+    | Kolačić | Opis |
+    |---------|------|
+    | `laravel_session` | Sesija korisnika, automatski se šalje uz svaki zahtev |
+    | `XSRF-TOKEN` | CSRF zaštita, dobija se pri prvom zahtevu |
+    | `remember_web_*` | Opcioni "zapamti me" kolačić |
+
+    ## Tok autentifikacije
+
+    1. **Inicijalni zahtev** – browser automatski dobija `XSRF-TOKEN` kolačić
+    2. **Login** (`POST /api/login`) – server postavlja `laravel_session` kolačić
+    3. **Svi naredni zahtevi** – browser automatski šalje kolačiće
+    4. **Za POST/PUT/DELETE** – obavezno slati `X-XSRF-TOKEN` header
+    5. **Logout** (`POST /api/logout`) – server briše sve kolačiće
+
+    ## CSRF zaštita
+
+    Pre svakog state-changing zahteva (POST, PUT, DELETE) frontend mora poslati:
+    ```
+    X-XSRF-TOKEN: {vrednost XSRF-TOKEN kolačića}
+    ```
+
+    ## Uloge korisnika
+    - **admin** – pun pristup (vozila CRUD, plaćanja)
+    - **registered_user** – rezervacije, preferencije
+    - **unregistered_user** – samo pregled vozila
+  version: 1.0.0
+  contact:
+    name: API Support
+
+servers:
+  - url: http://localhost:8000/api
+    description: Lokalni razvoj
+  - url: http://localhost:5173/api
+    description: Docker (proxy kroz frontend)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Security
+# ─────────────────────────────────────────────────────────────────────────────
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: laravel_session
+      description: Laravel session cookie (automatski se šalje iz browsera nakon login-a)
+    csrfToken:
+      type: apiKey
+      in: header
+      name: X-XSRF-TOKEN
+      description: |
+        CSRF zaštita – obavezno za POST, PUT, PATCH, DELETE.
+        Vrednost se čita iz `XSRF-TOKEN` kolačića koji Laravel automatski postavlja.
+
+  # ─── Schemas ───────────────────────────────────────────────────────────────
+  schemas:
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Marko Marković
+        email:
+          type: string
+          format: email
+          example: marko@example.com
+        role:
+          type: string
+          enum: [admin, registered_user, unregistered_user]
+          example: registered_user
+        created_at:
+          type: string
+          format: date-time
+
+    UserPreference:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        language:
+          type: string
+          example: sr
+        theme:
+          type: string
+          example: dark
+        cookies_accepted:
+          type: boolean
+          example: true
+
+    Vehicle:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        brand:
+          type: string
+          example: Toyota
+        model:
+          type: string
+          example: Corolla
+        registration_number:
+          type: string
+          example: BG-123-AB
+        year:
+          type: integer
+          example: 2022
+        daily_price:
+          type: integer
+          example: 5000
+        color:
+          type: string
+          example: Bela
+        mileage:
+          type: integer
+          example: 45000
+        fuel_type:
+          type: string
+          example: Benzin
+        transmission:
+          type: string
+          enum: [manual, automatic]
+          example: manual
+        seats:
+          type: integer
+          example: 5
+        status:
+          type: string
+          enum: [available, rented]
+          example: available
+        created_at:
+          type: string
+          format: date-time
+
+    Rental:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 2
+        vehicle_id:
+          type: integer
+          example: 1
+        start_date:
+          type: string
+          format: date
+          example: "2025-06-01"
+        end_date:
+          type: string
+          format: date
+          example: "2025-06-07"
+        total_price:
+          type: integer
+          example: 35000
+        status:
+          type: string
+          enum: [na_cekanju, placena, otkazana]
+          example: na_cekanju
+        days:
+          type: integer
+          example: 7
+          description: Računat atribut – broj dana iznajmljivanja
+        vehicle:
+          $ref: '#/components/schemas/Vehicle'
+        payment:
+          $ref: '#/components/schemas/Payment'
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        rental_id:
+          type: integer
+          example: 3
+        amount:
+          type: number
+          format: float
+          example: 35000.00
+        payment_date:
+          type: string
+          format: date
+          example: "2025-06-01"
+        method:
+          type: string
+          example: kartica
+
+    RentalStats:
+      type: object
+      properties:
+        total_rentals:
+          type: integer
+          example: 120
+        active_rentals:
+          type: integer
+          example: 14
+        cancelled_rentals:
+          type: integer
+          example: 8
+        total_revenue:
+          type: integer
+          example: 580000
+
+    # ─── Request Bodies ───────────────────────────────────────────────────────
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: marko@example.com
+        password:
+          type: string
+          format: password
+          example: password123
+        remember:
+          type: boolean
+          default: false
+          description: Ako je true, server postavlja dugotrajan `remember_web_*` kolačić
+          example: false
+
+    RegisterRequest:
+      type: object
+      required: [name, email, password, password_confirmation]
+      properties:
+        name:
+          type: string
+          example: Marko Marković
+        email:
+          type: string
+          format: email
+          example: marko@example.com
+        password:
+          type: string
+          format: password
+          example: password123
+        password_confirmation:
+          type: string
+          example: password123
+
+    VehicleRequest:
+      type: object
+      required: [brand, model, registration_number, year, daily_price]
+      properties:
+        brand:
+          type: string
+          example: Toyota
+        model:
+          type: string
+          example: Corolla
+        registration_number:
+          type: string
+          example: BG-123-AB
+        year:
+          type: integer
+          example: 2022
+        daily_price:
+          type: integer
+          example: 5000
+        color:
+          type: string
+          example: Bela
+        mileage:
+          type: integer
+          example: 0
+        fuel_type:
+          type: string
+          example: Benzin
+        transmission:
+          type: string
+          enum: [manual, automatic]
+        seats:
+          type: integer
+          example: 5
+        status:
+          type: string
+          enum: [available, rented]
+          default: available
+
+    RentalRequest:
+      type: object
+      required: [vehicle_id, start_date, end_date]
+      properties:
+        vehicle_id:
+          type: integer
+          example: 1
+        start_date:
+          type: string
+          format: date
+          example: "2025-06-01"
+        end_date:
+          type: string
+          format: date
+          example: "2025-06-07"
+
+    PaymentRequest:
+      type: object
+      required: [amount, payment_date, method]
+      properties:
+        amount:
+          type: number
+          format: float
+          example: 35000.00
+        payment_date:
+          type: string
+          format: date
+          example: "2025-06-01"
+        method:
+          type: string
+          example: kartica
+
+    UserPreferenceRequest:
+      type: object
+      properties:
+        language:
+          type: string
+          example: sr
+        theme:
+          type: string
+          example: dark
+        cookies_accepted:
+          type: boolean
+          example: true
+
+    # ─── Responses ────────────────────────────────────────────────────────────
+
+    UnauthorizedResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Unauthenticated.
+
+    ForbiddenResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: This action is unauthorized.
+
+    NotFoundResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Resource not found.
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: The given data was invalid.
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          example:
+            email: ["The email field is required."]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Tags
+# ─────────────────────────────────────────────────────────────────────────────
+tags:
+  - name: Auth
+    description: Registracija, prijava, odjava i reset lozinke
+  - name: User Preferences
+    description: Korisničke preferencije (jezik, tema, kolačići)
+  - name: Vehicles
+    description: Upravljanje vozilima
+  - name: Rentals
+    description: Iznajmljivanje vozila
+  - name: Payments
+    description: Plaćanja rezervacija
+  - name: Utility
+    description: Pomoćni endpointi
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Paths
+# ─────────────────────────────────────────────────────────────────────────────
+paths:
+
+  # ══════════════════════════════════════════
+  # AUTH
+  # ══════════════════════════════════════════
+
+  /register:
+    post:
+      tags: [Auth]
+      summary: Registracija novog korisnika
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        "201":
+          description: Korisnik uspešno registrovan
+          headers:
+            Set-Cookie:
+              description: |
+                Server postavlja session kolačić:
+                `laravel_session=...; HttpOnly; SameSite=Lax`
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Korisnik uspešno registrovan
+                  user:
+                    $ref: '#/components/schemas/User'
+              example:
+                message: Korisnik uspešno registrovan
+                user:
+                  id: 1
+                  name: Marko Marković
+                  email: marko@example.com
+                  role: registered_user
+        "422":
+          description: Greška pri validaciji
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  /login:
+    post:
+      tags: [Auth]
+      summary: Prijava korisnika
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        "200":
+          description: Uspešna prijava
+          headers:
+            Set-Cookie:
+              description: |
+                Server postavlja:
+                - `laravel_session` – sesijski kolačić
+                - `XSRF-TOKEN` – CSRF token
+                - `remember_web_*` – ako je `remember: true` (opciono)
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Uspešno prijavljivanje!
+                  user:
+                    $ref: '#/components/schemas/User'
+              example:
+                message: Uspešno prijavljivanje!
+                user:
+                  id: 1
+                  name: Marko Marković
+                  email: marko@example.com
+                  role: registered_user
+        "401":
+          description: Pogrešni kredencijali
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invalid credentials.
+        "422":
+          description: Greška pri validaciji
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  /logout:
+    post:
+      tags: [Auth]
+      summary: Odjava korisnika (briše token)
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      responses:
+        "200":
+          description: Uspešna odjava
+          headers:
+            Set-Cookie:
+              description: |
+                Server briše sve kolačiće:
+                - `laravel_session` (expires immediately)
+                - `remember_web_*` (expires immediately)
+                - `XSRF-TOKEN` (expires immediately)
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Logged out
+              example:
+                message: Logged out
+        "401":
+          description: Neautorizovan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+
+  /user:
+    get:
+      tags: [Auth]
+      summary: Vraća trenutno prijavljenog korisnika
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      responses:
+        "200":
+          description: Podaci o korisniku
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "401":
+          description: Neautorizovan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+  # ══════════════════════════════════════════
+  # USER PREFERENCES
+  # ══════════════════════════════════════════
+
+  /user-preferences:
+    get:
+      tags: [User Preferences]
+      summary: Preuzimanje preferencija prijavljenog korisnika
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      responses:
+        "200":
+          description: Preferencije korisnika
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreference'
+        "401":
+          description: Neautorizovan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+
+    post:
+      tags: [User Preferences]
+      summary: Kreiranje ili ažuriranje preferencija (POST)
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPreferenceRequest'
+      responses:
+        "200":
+          description: Preferencije sačuvane
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreference'
+        "401":
+          description: Neautorizovan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+
+    put:
+      tags: [User Preferences]
+      summary: Ažuriranje preferencija (PUT)
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPreferenceRequest'
+      responses:
+        "200":
+          description: Preferencije ažurirane
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreference'
+        "401":
+          description: Neautorizovan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+
+  # ══════════════════════════════════════════
+  # VEHICLES
+  # ══════════════════════════════════════════
+
+  /vehicles:
+    get:
+      tags: [Vehicles]
+      summary: Lista svih vozila (javno)
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [available, rented]
+          description: Filtriranje po statusu
+        - in: query
+          name: brand
+          schema:
+            type: string
+          description: Filtriranje po brendu
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+            default: 15
+          description: Broj rezultata po stranici
+      responses:
+        "200":
+          description: Lista vozila
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Vehicle'
+                  total:
+                    type: integer
+                  per_page:
+                    type: integer
+                  current_page:
+                    type: integer
+
+    post:
+      tags: [Vehicles]
+      summary: Kreiranje novog vozila (samo admin)
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VehicleRequest'
+      responses:
+        "201":
+          description: Vozilo kreirano
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+        "401":
+          description: Neautorizovan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+        "403":
+          description: Zabranjen pristup
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        "422":
+          description: Greška pri validaciji
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  /vehicles/{vehicle}:
+    get:
+      tags: [Vehicles]
+      summary: Detalji jednog vozila (javno)
+      parameters:
+        - in: path
+          name: vehicle
+          required: true
+          schema:
+            type: integer
+          description: ID vozila
+      responses:
+        "200":
+          description: Podaci o vozilu
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+        "404":
+          description: Vozilo nije pronađeno
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+
+    put:
+      tags: [Vehicles]
+      summary: Ažuriranje vozila (samo admin)
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      parameters:
+        - in: path
+          name: vehicle
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VehicleRequest'
+      responses:
+        "200":
+          description: Vozilo ažurirano
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+        "403":
+          description: Zabranjen pristup
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        "404":
+          description: Vozilo nije pronađeno
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+
+    patch:
+      tags: [Vehicles]
+      summary: Parcijalno ažuriranje vozila (samo admin)
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      parameters:
+        - in: path
+          name: vehicle
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VehicleRequest'
+      responses:
+        "200":
+          description: Vozilo ažurirano
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+
+    delete:
+      tags: [Vehicles]
+      summary: Brisanje vozila (samo admin)
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      parameters:
+        - in: path
+          name: vehicle
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Vozilo obrisano
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Vehicle deleted successfully.
+        "403":
+          description: Zabranjen pristup
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        "404":
+          description: Vozilo nije pronađeno
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+
+  # ══════════════════════════════════════════
+  # RENTALS
+  # ══════════════════════════════════════════
+
+  /rentals:
+    get:
+      tags: [Rentals]
+      summary: Lista svih rezervacija (admin vidi sve, korisnik samo svoje)
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [na_cekanju, placena, otkazana]
+          description: Filtriranje po statusu
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+            default: 15
+      responses:
+        "200":
+          description: Lista rezervacija
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Rental'
+        "401":
+          description: Neautorizovan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+
+    post:
+      tags: [Rentals]
+      summary: Kreiranje nove rezervacije
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RentalRequest'
+      responses:
+        "201":
+          description: Rezervacija kreirana
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rental'
+        "422":
+          description: Greška pri validaciji
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  /rentals/{id}:
+    get:
+      tags: [Rentals]
+      summary: Detalji jedne rezervacije
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Podaci o rezervaciji
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rental'
+        "404":
+          description: Rezervacija nije pronađena
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+
+    put:
+      tags: [Rentals]
+      summary: Ažuriranje rezervacije (admin)
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RentalRequest'
+      responses:
+        "200":
+          description: Rezervacija ažurirana
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rental'
+
+    delete:
+      tags: [Rentals]
+      summary: Brisanje rezervacije
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Rezervacija obrisana
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Rental deleted successfully.
+        "404":
+          description: Rezervacija nije pronađena
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+
+  /my-rentals:
+    get:
+      tags: [Rentals]
+      summary: Rezervacije trenutno prijavljenog korisnika
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      responses:
+        "200":
+          description: Lista mojih rezervacija
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Rental'
+        "401":
+          description: Neautorizovan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+
+  /my-rentals/{id}:
+    put:
+      tags: [Rentals]
+      summary: Ažuriranje sopstvene rezervacije
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RentalRequest'
+      responses:
+        "200":
+          description: Rezervacija ažurirana
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rental'
+        "403":
+          description: Nije vaša rezervacija
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+
+  /rentals/{id}/cancel:
+    put:
+      tags: [Rentals]
+      summary: Otkazivanje rezervacije
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Rezervacija otkazana
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Rental cancelled successfully.
+                  rental:
+                    $ref: '#/components/schemas/Rental'
+        "404":
+          description: Rezervacija nije pronađena
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+
+  /vehicles/{id}/rentals:
+    get:
+      tags: [Rentals]
+      summary: Sve rezervacije za određeno vozilo
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID vozila
+      responses:
+        "200":
+          description: Lista rezervacija vozila
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Rental'
+        "404":
+          description: Vozilo nije pronađeno
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+
+  /rentals-statistics:
+    get:
+      tags: [Rentals]
+      summary: Statistike rezervacija (samo admin)
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      responses:
+        "200":
+          description: Statistike
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RentalStats'
+        "403":
+          description: Zabranjen pristup
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+
+  # ══════════════════════════════════════════
+  # PAYMENTS
+  # ══════════════════════════════════════════
+
+  /payments:
+    get:
+      tags: [Payments]
+      summary: Lista svih plaćanja (samo admin)
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      responses:
+        "200":
+          description: Lista plaćanja
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Payment'
+        "403":
+          description: Zabranjen pristup
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+
+  /payments/{rentalId}:
+    post:
+      tags: [Payments]
+      summary: Kreiranje plaćanja za rezervaciju (samo admin)
+      security:
+        - cookieAuth: []
+        - csrfToken: []
+      parameters:
+        - in: path
+          name: rentalId
+          required: true
+          schema:
+            type: integer
+          description: ID rezervacije za koju se vrši plaćanje
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        "201":
+          description: Plaćanje kreirano
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        "403":
+          description: Zabranjen pristup
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        "404":
+          description: Rezervacija nije pronađena
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        "422":
+          description: Greška pri validaciji
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  # ══════════════════════════════════════════
+  # UTILITY
+  # ══════════════════════════════════════════
+
+  /convert-rsd-to-eur:
+    get:
+      tags: [Utility]
+      summary: Konverzija RSD u EUR
+      parameters:
+        - in: query
+          name: amount
+          required: true
+          schema:
+            type: number
+            example: 5000
+          description: Iznos u RSD koji se konvertuje
+      responses:
+        "200":
+          description: Rezultat konverzije
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  result:
+                    type: number
+                    example: 42.55
+                  info:
+                    type: object
+                    properties:
+                      rate:
+                        type: number
+                        example: 0.00851
+        "400":
+          description: Neispravan iznos
