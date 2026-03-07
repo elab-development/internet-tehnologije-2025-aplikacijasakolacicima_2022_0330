@@ -21,7 +21,7 @@
         <env name="APP_ENV" value="testing"/>
 
         <env name="APP_ENV" value="testing"/>
-        <env name="APP_KEY" value="base64:OScCHr17rL/Xm4FktqsZAzTMDQZW7IwhjwfE0vVb1QA=/>">
+        <env name="APP_KEY" value="base64:OScCHr17rL/Xm4FktqsZAzTMDQZW7IwhjwfE0vVb1QA="/>
 
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_DRIVER" value="array"/>
