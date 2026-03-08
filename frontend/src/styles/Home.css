@@ -54,3 +54,45 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.weather-banner {
+  background: linear-gradient(135deg, var(--bg-secondary, #1e3a5f), var(--bg-primary, #162d4a));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px 28px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.weather-banner span {
+  font-size: 2.4rem;
+}
+
+.weather-banner .weather-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.weather-banner .weather-city {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-secondary, #a0b4c8);
+}
+
+.weather-banner .weather-temp {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary, #ffffff);
+  line-height: 1;
+}
+
+.weather-banner .weather-wind {
+  font-size: 13px;
+  color: var(--text-secondary, #a0b4c8);
+}
