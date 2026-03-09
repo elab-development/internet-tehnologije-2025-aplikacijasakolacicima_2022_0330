@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+//import axios from 'axios';
+import api from '../axios';
 import '../styles/Login.css';
 
 const AuthForm = () => {
@@ -21,7 +22,9 @@ const AuthForm = () => {
         
         //const csrfResponse = await axios.get('/sanctum/csrf-cookie', { withCredentials: true });
         //console.log('CSRF Response:', csrfResponse);
-        await axios.get('/sanctum/csrf-cookie', { withCredentials: true });
+       
+       // await axios.get('/sanctum/csrf-cookie', { withCredentials: true });
+       await api.get('/sanctum/csrf-cookie');
 
         const url = isRegister ? '/api/register' : '/api/login';
         const data = isRegister
@@ -30,7 +33,8 @@ const AuthForm = () => {
 
         console.log('Šaljem request za log:', url, data);
         
-        await axios.post(url, data, { withCredentials: true });
+        //await axios.post(url, data, { withCredentials: true });
+        await api.post(url, data);
 
         alert(isRegister ? 'Uspešna registracija!' : 'Uspešna prijava!');
         window.location.href = '/';
