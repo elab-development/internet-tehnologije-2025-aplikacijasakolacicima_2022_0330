@@ -1,10 +1,10 @@
-import api from '../axios';
-
+//import api from '../axios';
+import axios from 'axios';
 const LogoutTest = () => {
     const handleLogout = async () => {
       try {
-       // await axios.post('/api/logout');
-       await api.post('/api/logout');
+       await axios.post('/api/logout');
+      // await api.post('/api/logout');
 
         localStorage.clear(); // Obriši iz localStorage
         

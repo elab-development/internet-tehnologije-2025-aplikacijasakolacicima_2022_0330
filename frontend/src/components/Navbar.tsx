@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import "../styles/Navbar.css";
 import { useEffect } from "react";
 import api from "../axios";
+//import axios from 'axios';
 import ThemeToggle from "./ThemeToggle";
 
 interface User {
