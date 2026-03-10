@@ -44,10 +44,17 @@ const AuthForm = () => {
 
         console.log('Šaljem request za log:', url, data);
         
-        
-        await axios.post(url, data, { withCredentials: true });
+        //******************************************************* */
+        //await axios.post(url, data, { withCredentials: true });
+        const baseUrl = apiUrl ? apiUrl.replace('/api', '') : '';
+        if (apiUrl) {
+            await axios.post(`${baseUrl}${url}`, data, { withCredentials: true });
+        } else {
+            await axios.post(url, data, { withCredentials: true });
+        }
         
 
+        
         alert(isRegister ? 'Uspešna registracija!' : 'Uspešna prijava!');
         window.location.href = '/';
         
