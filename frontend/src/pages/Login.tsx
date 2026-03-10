@@ -23,8 +23,19 @@ const AuthForm = () => {
         //const csrfResponse = await axios.get('/sanctum/csrf-cookie', { withCredentials: true });
         //console.log('CSRF Response:', csrfResponse);
        
-        await axios.get('/sanctum/csrf-cookie', { withCredentials: true });
-       //await api.get('/sanctum/csrf-cookie');
+        //******************************************************************** */
+       // await axios.get('/sanctum/csrf-cookie', { withCredentials: true });
+        const apiUrl = import.meta.env.VITE_API_URL;
+        if (apiUrl) {
+        // Produkcija
+            const baseUrl = apiUrl.replace('/api', '');
+            await axios.get(`${baseUrl}/sanctum/csrf-cookie`, { withCredentials: true });
+        } else {
+        // Lokalno - koristi proxy
+            await axios.get('/sanctum/csrf-cookie', { withCredentials: true });
+        }
+
+
 
         const url = isRegister ? '/api/register' : '/api/login';
         const data = isRegister
@@ -33,8 +44,9 @@ const AuthForm = () => {
 
         console.log('Šaljem request za log:', url, data);
         
+        
         await axios.post(url, data, { withCredentials: true });
-        //await api.post(url, data);
+        
 
         alert(isRegister ? 'Uspešna registracija!' : 'Uspešna prijava!');
         window.location.href = '/';
