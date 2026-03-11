@@ -1,66 +1,128 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Web aplikacija koja implementira rad sa kolačićima
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Web aplikacija za iznajmljivanje vozila koja upotrebljava kolačiće za upravljanje sesijom, korisničkim preferencijama i "Zapamti me" funkcionalnošću. Cilj aplikacije je da korisnicima omogući jednostavno pregledanje, rezervaciju i plaćanje vozila.
 
-## About Laravel
+## Opis aplikacije
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Aplikacija podržava tri tipa korisnika sa različitim nivoima pristupa:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Gost** - Pregled i pretraga vozila, filtriranje i sortiranje, detalji vozila, nedavno pregledana vozila, registracija/logovanje, promena teme
+- **Ulogovani korisnik** -  Sve što i gost + rezervacija vozila, istorija rezervacija, pamćenje podataka za login, plaćanje rezervacije, promena preferencija prikaza 
+- **Admin** - Sve što i ulogovani korisnik + CRUD operacije nad vozilima, pregled svih rezervacija, statistike poslovanja
 
-## Learning Laravel
+### Upotreba kolačića
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Kolačići se u aplikaciji koriste za:
+- **Sesiju korisnika** — `laravel_session` kolačić koji identifikuje prijavljenog korisnika
+- **"Zapamti me"** — `remember_web` kolačić koji traje 60 dana i omogućava automatsku prijavu
+- **Temu prikaza** — pamćenje svetle/tamne teme, traje 365 dana
+  
+## Tehnologije
+- Backend (PHP, Laravel, MySQL, Composer, L5-Swagger)
+- Frontend (React 18, TypeScript, Vite, Axios, React Router)
+- DevOps (Docker, Docker Compose, Nginx, GitHub Actions)
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Pokretanje aplikacije
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 1. Kloniranje projekta
 
-## Laravel Sponsors
+- `git clone https://github.com/elab-development/internet-tehnologije-2025-aplikacijasakolacicima_2022_0330.git`
+- `cd internet-tehnologije-2025-aplikacijasakolacicima_2022_0330`
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+### 2. Konfiguracija .env fajla
+- `cp .env.example .env`
 
-### Premium Partners
+Otvoriti `.env` fajl i podesiti:
+```
+APP_NAME=Laravel
+APP_ENV=local
+APP_KEY=                              
+APP_DEBUG=true
+APP_URL=http://localhost:8000
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=cookies_app
+DB_USERNAME=root
+DB_PASSWORD=
 
-## Contributing
+SESSION_DOMAIN=
+SANCTUM_STATEFUL_DOMAINS=localhost,localhost:5173
+SESSION_SECURE_COOKIE=false
+FRONTEND_URL=http://localhost:5173
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 3. Pokretanje backenda
 
-## Code of Conduct
+- `composer install`
+- `php artisan key:generate`
+- `php artisan migrate
+- `php artisan serve`
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Backend dostupan na: **http://localhost:8000*
 
-## Security Vulnerabilities
+### 4. Pokretanje frontenda
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+- `cd frontend`
+- `npm install`
+- `npm run dev`
 
-## License
+Frontend dostupan na: **http://localhost:5173**
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Pokretanje pomoću Dockera
+
+### 1. Konfiguracija .env fajla za Docker
+
+- `cp .env.example .env`
+
+- U `.env` fajlu za Docker, `DB_HOST` mora biti `db`, a ne `127.0.0.1`.
+
+env:
+```
+APP_NAME="Vehicle Rental App"
+APP_ENV=local
+APP_KEY=                           
+APP_DEBUG=true
+APP_URL=http://localhost
+
+DB_CONNECTION=mysql
+DB_HOST=db                          
+DB_PORT=3306
+DB_DATABASE=cookies_app
+DB_USERNAME=laravel
+DB_PASSWORD=secret
+
+SANCTUM_STATEFUL_DOMAINS=localhost
+FRONTEND_URL=http://localhost
+```
+
+### 3. Izgradnja i pokretanje kontejnera
+
+`docker-compose up --build -d`
+
+### 4. Inicijalizacija aplikacije
+
+- `docker-compose exec backend php artisan key:generate`
+- `docker-compose exec backend php artisan migrate --seed`
+- `docker-compose exec backend php artisan l5-swagger:generate`
+
+## Pokretanje testova
+
+- `php artisan test`
+
+Testovi pokrivaju:
+- **AuthTest** — registracija, prijava, uloge korisnika
+- **VehicleTest** — listanje, detalji, filtriranje vozila
+- **RentalTest** — kreiranje, pregled i validacija rezervacija
+
+Testovi se automatski pokreću kroz **GitHub Actions CI/CD pipeline** na svaki `push` ili `pull request` prema `main` ili `develop` grani. Deploy na produkciju se vrši samo ako svi testovi prođu.
+
+## Produkcija
+
+Aplikacija je postavljena na **Render.com** platformi:
+
+- Frontend  https://kolacici-frontend.onrender.com 
+- Backend  https://kolacici-backend.onrender.com 
+- Swagger dokumentacija   https://kolacici-backend.onrender.com/api/documentation 
